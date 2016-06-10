@@ -6,7 +6,7 @@ module EventMachine
             
             DEFAULT_STOP_TIMEOUT = 5.0 # seconds
             
-            attr_reader :logger, :listeners, :stopping, :stop_wait_count
+            attr_reader :logger, :listeners, :stopping, :stop_timeout
             
             def initialize(opts={})
                 set_opts(opts)
