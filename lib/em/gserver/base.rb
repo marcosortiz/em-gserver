@@ -1,6 +1,3 @@
-require 'em/gserver'
-require 'em/gserver/listeners/manager'
-
 module EventMachine
     module GServer
         class Base

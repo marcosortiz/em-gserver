@@ -1,6 +1,6 @@
 require 'logger'
 require 'time'
-require_relative '../lib/em/gserver/base'
+require_relative '../lib/em/gserver'
 
 port = ARGV[0].to_i
 port = 2000 if port <= 0
