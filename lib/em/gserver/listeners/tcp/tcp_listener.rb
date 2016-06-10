@@ -17,12 +17,6 @@ module EventMachine
                     log(:info, "Started #{@signature} linstening on tcp://#{@host}:#{@port} (separator=#{@separator.inspect}).")
                     super
                 end
-        
-                # def stop
-                #     EM.stop_server(@signature)
-                #     log(:info, "Server #{@signature} gracefully stopped listening on tcp://#{@host}:#{@port}.")
-                #     super
-                # end
 
                 private
         

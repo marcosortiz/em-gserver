@@ -8,11 +8,7 @@ module EventMachine
             class Connection < EM::Connection
                 include EventMachine::GServer::Utils
                 attr_accessor :logger, :server, :separator
-        
-                def post_init
-            
-                end
-        
+                
                 def unbind
                     server.connections.delete(self)
                 end
