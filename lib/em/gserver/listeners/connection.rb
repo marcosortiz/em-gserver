@@ -1,6 +1,6 @@
 require 'eventmachine'
-require File.join(File.dirname(__FILE__), '..', 'constants')
-require File.join(File.dirname(__FILE__), '..', 'utils')
+require 'em/gserver/constants'
+require 'em/gserver/utils'
 
 module EventMachine
     module GServer

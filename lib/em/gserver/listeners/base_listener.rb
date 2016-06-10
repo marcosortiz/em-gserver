@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), 'connection')
+require 'em/gserver/listeners/connection'
 
 module EventMachine
     module GServer

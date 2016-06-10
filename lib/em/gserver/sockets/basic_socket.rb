@@ -1,7 +1,7 @@
 require 'socket'
 require 'timeout'
-require File.join(File.dirname(__FILE__), '..', '..', 'gserver')
-require File.join(File.dirname(__FILE__), '..', 'constants')
+require 'em/gserver'
+require 'em/gserver/constants'
 
 module EventMachine
     module GServer

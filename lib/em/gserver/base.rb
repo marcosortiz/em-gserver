@@ -1,5 +1,5 @@
-require File.join(File.dirname(__FILE__), '..', 'gserver')
-require File.join(File.dirname(__FILE__), 'listeners', 'manager')
+require 'em/gserver'
+require 'em/gserver/listeners/manager'
 
 module EventMachine
     module GServer

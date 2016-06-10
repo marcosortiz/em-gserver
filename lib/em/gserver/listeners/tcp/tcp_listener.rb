@@ -1,5 +1,5 @@
 require 'eventmachine'
-require File.join(File.dirname(__FILE__), '..', 'base_listener')
+require 'em/gserver/listeners/base_listener'
 
 module EventMachine
     module GServer

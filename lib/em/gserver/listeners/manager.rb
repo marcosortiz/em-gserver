@@ -1,7 +1,7 @@
-require File.join(File.dirname(__FILE__), '..', 'constants')
-require File.join(File.dirname(__FILE__), 'tcp', 'tcp_listener')
-require File.join(File.dirname(__FILE__), 'udp', 'udp_listener')
-require File.join(File.dirname(__FILE__), 'unix', 'unix_listener')
+require 'em/gserver/constants'
+require 'em/gserver/listeners/tcp/tcp_listener'
+require 'em/gserver/listeners/udp/udp_listener'
+require 'em/gserver/listeners/unix/unix_listener'
 
 
 module EventMachine

@@ -1,4 +1,4 @@
-require File.join(File.dirname(__FILE__), '..', 'basic_socket')
+require 'em/gserver/sockets/basic_socket'
 
 module EventMachine
     module GServer
