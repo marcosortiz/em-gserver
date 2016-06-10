@@ -1,8 +1,8 @@
-# Em::Sockets
+# EventMachine::GServer
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/em/sockets`. To experiment with that code, run `bin/console` for an interactive prompt.
+The em-gserver gem provides an easy way to implement customisable servers that can run several instances of TCP, UDP and Unix listeners.
 
-TODO: Delete this and the text above, and describe your gem
+It uses [eventmachine](https://github.com/eventmachine/eventmachine) and was inspired by the [gserver](https://github.com/ruby/gserver) gem.
 
 ## Installation
 
@@ -32,7 +32,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/em-gserver.
+Bug reports and pull requests are welcome on GitHub at https://github.com/marcosortiz/em-gserver.
 
 
 ## License
