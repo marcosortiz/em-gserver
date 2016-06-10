@@ -1,4 +1,4 @@
-# EventMachine::GServer
+# EventMachine::GServer  [![Build Status](https://travis-ci.org/marcosortiz/em-gserver.svg?branch=dev)](https://travis-ci.org/marcosortiz/em-gserver)
 
 The em-gserver gem provides an easy way to implement customisable servers that can run several instances of TCP, UDP and Unix listeners.
 
