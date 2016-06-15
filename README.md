@@ -4,7 +4,6 @@ The em-gserver gem provides an easy way to implement customisable servers that c
 
 It uses [eventmachine](https://github.com/eventmachine/eventmachine) and was inspired by the [gserver](https://github.com/ruby/gserver) gem.
 
-## Test Coverage [![Code Climate](https://codeclimate.com/github/marcosortiz/em-gserver/badges/gpa.svg)](https://codeclimate.com/github/marcosortiz/em-gserver) [![Test Coverage](https://codeclimate.com/github/marcosortiz/em-gserver/badges/coverage.svg)](https://codeclimate.com/github/marcosortiz/em-gserver/coverage)
 ## Installation
 
 Add this line to your application's Gemfile:
@@ -25,7 +24,7 @@ Or install it yourself as:
 
 TODO: Write usage instructions here
 
-## Development
+## Development [![Code Climate](https://codeclimate.com/github/marcosortiz/em-gserver/badges/gpa.svg)](https://codeclimate.com/github/marcosortiz/em-gserver) [![Test Coverage](https://codeclimate.com/github/marcosortiz/em-gserver/badges/coverage.svg)](https://codeclimate.com/github/marcosortiz/em-gserver/coverage)
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
@@ -39,4 +38,3 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/marcos
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
