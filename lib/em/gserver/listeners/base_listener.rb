@@ -7,7 +7,12 @@ module EventMachine
                 include EventMachine::GServer::Utils
         
                 attr_accessor :connections, :stop_requested, :host, :port, :socket_path
-                attr_reader :status, :started_at, :logger
+                attr_reader :status, :started_at, :logger, :inactivity_timeout,
+                    :connection_timeout, :signature, :max_connections
+                
+                DEFAULT_INACTIVITY_TIMEOUT = 5.0 # seconds
+                DEFAULT_CONNECTION_TIMEOUT = 5.0 # seconds
+                DEFAILT_MAX_CONNECTIONS    = 5
         
                 def initialize(opts={})
                     setup_opts(opts)
@@ -40,9 +45,21 @@ module EventMachine
 
                 def setup_opts(opts)
                     @logger = opts[:logger]
+                    
                     @handler = opts[:handler] || EmServer::Connection
+                    
                     @separator = opts[:separator] || CRLF
                     @separator = nil if opts[:no_msg_separator] == true
+                    
+                    @inactivity_timeout = opts[INACTIVITY_TIMEOUT_SYM].to_f
+                    @inactivity_timeout = DEFAULT_INACTIVITY_TIMEOUT if @inactivity_timeout <= 0.0
+                
+                    @connection_timeout = opts[CONNECTION_TIMEOUT_SYM].to_f
+                    @connection_timeout = DEFAULT_CONNECTION_TIMEOUT if @connection_timeout <= 0.0
+                    
+                    @max_connections = opts[MAX_CONNECTIONS_SYM].to_i
+                    @max_connections = DEFAILT_MAX_CONNECTIONS if @max_connections <=0
+                    
                     check_handler
                 end
         
@@ -52,9 +69,20 @@ module EventMachine
                 end
 
                 def setup_connection_opts(connection)
-                    connection.logger = @logger
-                    connection.server = self
-                    connection.separator = @separator
+                    if connections.count >= @max_connections
+                        msg = "Can not open more than #{@max_connections} simulatenous connections."
+                        msg << "Connection #{connection.signature} discarded."
+                        connection.close_connection(false)
+                        log(:warn, msg)
+                    else
+                        connections << connection
+                        log(:debug, "Listener #{@signature} received a client connection (id=#{connection.signature}).")
+                        connection.logger = @logger
+                        connection.server = self
+                        connection.separator = @separator
+                        connection.comm_inactivity_timeout = @inactivity_timeout
+                        connection.pending_connect_timeout = @connection_timeout
+                    end
                 end
 
                 def wait_for_connections_and_stop

@@ -10,7 +10,7 @@ module EventMachine
                 attr_accessor :logger, :server, :separator
                 
                 def unbind
-                    server.connections.delete(self)
+                    server.connections.delete(self) unless server.nil?
                 end
     
                 def do_work(cmd_hash)
@@ -20,7 +20,6 @@ module EventMachine
                 private
     
                 def receive_data(cmd)
-                    server.connections << self
                     cmd.chomp!(@separator) if @separator
                     log(:debug, "Received: #{cmd.inspect}.")
                     process(cmd)

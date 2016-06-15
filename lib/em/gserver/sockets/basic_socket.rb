@@ -57,9 +57,10 @@ module EventMachine
             # "Connection reset by peer" is the TCP/IP equivalent of slamming the phone back on the hook.
             # It's more polite than merely not replying, leaving one hanging.
             # But it's not the FIN-ACK expected of the truly polite TCP/IP converseur.
-            rescue Errno::ECONNRESET
+            rescue Errno::ECONNRESET => e
                 log(:info, 'Connection reset by peer.')
                 self.disconnect
+                raise e
             rescue Exception => e
                 @socket.close if @socket && !@socket.closed?
                 raise e
@@ -94,9 +95,10 @@ module EventMachine
                         self.disconnect
                         raise Timeout::Error, "No response within #{@timeout} seconds."
                     end
-                rescue EOFError
+                rescue EOFError => e
                     log(:info, "Server disconnected.")
                     self.disconnect
+                    raise e
                 end
             end
         end

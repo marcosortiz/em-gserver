@@ -1,13 +1,8 @@
-# EventMachine::GServer  [![Build Status](https://travis-ci.org/marcosortiz/em-gserver.svg?branch=dev)](https://travis-ci.org/marcosortiz/em-gserver)
-
-[![Dependency Status][DS img]][Dependency Status]
+# EventMachine::GServer [![Build Status](https://travis-ci.org/marcosortiz/em-gserver.svg?branch=dev)](https://travis-ci.org/marcosortiz/em-gserver) [![Dependency Status](https://gemnasium.com/badges/github.com/marcosortiz/em-gserver.svg)](https://gemnasium.com/github.com/marcosortiz/em-gserver) [![Code Climate](https://codeclimate.com/github/marcosortiz/em-gserver/badges/gpa.svg)](https://codeclimate.com/github/marcosortiz/em-gserver) [![Test Coverage](https://codeclimate.com/github/marcosortiz/em-gserver/badges/coverage.svg)](https://codeclimate.com/github/marcosortiz/em-gserver/coverage)
 
 The em-gserver gem provides an easy way to implement customisable servers that can run several instances of TCP, UDP and Unix listeners.
 
 It uses [eventmachine](https://github.com/eventmachine/eventmachine) and was inspired by the [gserver](https://github.com/ruby/gserver) gem.
-
-[Dependency Status]: https://gemnasium.com/marcosortiz/em-gserver
-[DS img]: https://gemnasium.com/elgalu/boolean_class.png
 
 ## Installation
 

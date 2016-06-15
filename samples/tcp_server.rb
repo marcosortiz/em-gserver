@@ -16,7 +16,12 @@ class MyServer < EventMachine::GServer::Base
     def do_work
         EventMachine.next_tick do
             EM.add_periodic_timer(1) do
-                log(:info, "Doing my periodic work ...")
+                msg = ""
+                listeners.each do |l|
+                    msg << "listener #{l.signature} connections=#{l.connections.count}"
+                    msg << ',' unless l == listeners.last
+                end
+                log(:info, msg)
             end
         end
     end
@@ -27,6 +32,8 @@ opts = {
     :port => port, 
     :handler => MyConnection,
     :logger => Logger.new(STDOUT),
+    :heartbeat_timeout => 1.0,
+    :max_connections => 1,
 }
 listeners = []
 2.times do |i|

@@ -4,9 +4,11 @@ module EventMachine
             include EventMachine::GServer::Utils
             include EventMachine::GServer::Listeners::Manager
             
-            DEFAULT_STOP_TIMEOUT = 5.0 # seconds
+            DEFAULT_STOP_TIMEOUT               = 5.0 # seconds
+            DEFAULT_HEARTBEAT_TIMEOUT          = 2.0 # seconds
             
-            attr_reader :logger, :listeners, :stopping, :stop_timeout
+            attr_reader :logger, :listeners, :stopping, :stop_timeout,
+                :heartbeat_interval
             
             def initialize(opts={})
                 set_opts(opts)
@@ -23,6 +25,7 @@ module EventMachine
                 register_error_handler
                 EM.run do
                     register_trap_signals
+                    set_heartbeat_timeout(@heartbeat_timeout)
                     start_listeners
                     stop_reactor_if_all_listeners_stopped
                     do_work
@@ -39,8 +42,12 @@ module EventMachine
             
             def set_opts(opts={})
                 @logger = opts[:logger]
+                
                 @stop_timeout = opts[STOP_TIMEOUT_SYM].to_f
                 @stop_timeout = DEFAULT_STOP_TIMEOUT if @stop_timeout <= 0.0
+                
+                @heartbeat_timeout = opts[HEARTBEAT_TIMEOUT_SYM].to_f
+                @heartbeat_timeout = DEFAULT_HEARTBEAT_TIMEOUT if @heartbeat_timeout <= 0.0
             end
             
             #
@@ -84,6 +91,12 @@ module EventMachine
                     resp = true
                 end
                 resp
+            end
+            
+            def set_heartbeat_timeout(timeout)
+                if EventMachine.reactor_running?
+                    EventMachine.heartbeat_interval = timeout
+                end
             end
             
         end
