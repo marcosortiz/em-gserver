@@ -1,9 +1,10 @@
-# EventMachine::GServer [![Build Status](https://travis-ci.org/marcosortiz/em-gserver.svg?branch=dev)](https://travis-ci.org/marcosortiz/em-gserver) [![Dependency Status](https://gemnasium.com/badges/github.com/marcosortiz/em-gserver.svg)](https://gemnasium.com/github.com/marcosortiz/em-gserver) [![Code Climate](https://codeclimate.com/github/marcosortiz/em-gserver/badges/gpa.svg)](https://codeclimate.com/github/marcosortiz/em-gserver) [![Test Coverage](https://codeclimate.com/github/marcosortiz/em-gserver/badges/coverage.svg)](https://codeclimate.com/github/marcosortiz/em-gserver/coverage)
+# EventMachine::GServer [![Build Status](https://travis-ci.org/marcosortiz/em-gserver.svg?branch=dev)](https://travis-ci.org/marcosortiz/em-gserver) [![Dependency Status](https://gemnasium.com/badges/github.com/marcosortiz/em-gserver.svg)](https://gemnasium.com/github.com/marcosortiz/em-gserver)
 
 The em-gserver gem provides an easy way to implement customisable servers that can run several instances of TCP, UDP and Unix listeners.
 
 It uses [eventmachine](https://github.com/eventmachine/eventmachine) and was inspired by the [gserver](https://github.com/ruby/gserver) gem.
 
+## Test Coverage [![Code Climate](https://codeclimate.com/github/marcosortiz/em-gserver/badges/gpa.svg)](https://codeclimate.com/github/marcosortiz/em-gserver) [![Test Coverage](https://codeclimate.com/github/marcosortiz/em-gserver/badges/coverage.svg)](https://codeclimate.com/github/marcosortiz/em-gserver/coverage)
 ## Installation
 
 Add this line to your application's Gemfile:
