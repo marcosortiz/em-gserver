@@ -1,3 +1,9 @@
+require 'em/gserver/constants'
+require 'em/gserver/exceptions'
+require 'em/gserver/utils'
+require 'em/gserver/version'
+require 'em/gserver/listeners/manager'
+
 module EventMachine
     module GServer
         class Base
@@ -8,11 +14,12 @@ module EventMachine
             DEFAULT_HEARTBEAT_TIMEOUT          = 2.0 # seconds
             
             attr_reader :logger, :listeners, :stopping, :stop_timeout,
-                :heartbeat_interval
+                :heartbeat_interval, :status
             
             def initialize(opts={})
                 set_opts(opts)
                 set_listeners(opts)
+                @status = STOPPED_SYM
                 @stopping = false
                 @stop_wait_count = 0
             end
@@ -21,7 +28,8 @@ module EventMachine
             end
             
             def start
-                return if EventMachine.reactor_running?
+                return @status unless @status == STOPPED_SYM
+                @status = STARTING_SYM
                 register_error_handler
                 EM.run do
                     register_trap_signals
@@ -29,13 +37,18 @@ module EventMachine
                     start_listeners
                     stop_reactor_if_all_listeners_stopped
                     do_work
-                    logger.info "EventMachine::GServer up and running with pid=#{Process.pid}. Press Ctrl+C to quit."
+                    log(:info, "EventMachine::GServer up and running with pid=#{Process.pid}.")
+                    @status = RUNNING_SYM
                 end
             end
 
-            def stop
+            def stop(force=false)
+                return @status unless @status == RUNNING_SYM
+                @status = STOPPING_SYM
                 @stopping = true
-                stop_listeners
+                stop_listeners(force)
+                EventMachine.stop if force == true && EventMachine.reactor_running?
+                @status = STOPPED_SYM
             end
 
             private
@@ -55,8 +68,9 @@ module EventMachine
             #
             def register_error_handler
                 EM.error_handler do |e|
-                    logger.error "#{e.class}: #{e.message}"
-                    logger.error e.backtrace.join("\n")
+                    log(:error, "#{e.class}: #{e.message}")
+                    log(:error, e.backtrace.join("\n"))
+                    stop(true)
                     raise e
                 end
             end

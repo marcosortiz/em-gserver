@@ -6,8 +6,8 @@ port = ARGV[0].to_i
 port = 2000 if port <= 0
 
 class MyConnection < EventMachine::GServer::Listeners::Connection
-    def do_work(msg)
-        msg
+    def do_work(req)
+        req
     end
 end
 
@@ -33,7 +33,7 @@ opts = {
     :handler => MyConnection,
     :logger => Logger.new(STDOUT),
     :heartbeat_timeout => 1.0,
-    :max_connections => 1,
+    :max_connections => 10,
 }
 listeners = []
 2.times do |i|

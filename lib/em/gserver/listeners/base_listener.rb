@@ -6,13 +6,14 @@ module EventMachine
             class Base
                 include EventMachine::GServer::Utils
         
-                attr_accessor :connections, :stop_requested, :host, :port, :socket_path
+                attr_accessor :connections, :stop_requested, :host, :port, :socket_path, :server
                 attr_reader :status, :started_at, :logger, :inactivity_timeout,
-                    :connection_timeout, :signature, :max_connections
+                    :connection_timeout, :signature, :max_connections, :default_error_resp
                 
                 DEFAULT_INACTIVITY_TIMEOUT = 5.0 # seconds
                 DEFAULT_CONNECTION_TIMEOUT = 5.0 # seconds
                 DEFAILT_MAX_CONNECTIONS    = 5
+                DEFAULT_ERROR_RESP         = 'internal error'
         
                 def initialize(opts={})
                     setup_opts(opts)
@@ -31,12 +32,24 @@ module EventMachine
                     start_server
                 end
         
-                def stop
-                    @status = STOPPED_SYM
-                    EventMachine.next_tick do
-                        unless wait_for_connections_and_stop
-                            # Still some connections running, schedule a check later
-                            EM.add_periodic_timer(1) { wait_for_connections_and_stop }
+                def stop(force=false)
+                    return if @status == STOPPED_SYM
+                    if force == true
+                        EventMachine.next_tick do
+                            @connections.each do |conn|
+                                log(:info, "Forced stop requested. Closing connection #{conn.signature}")
+                                conn.close_connection(false)
+                            end
+                            EM.stop_server(@signature)
+                            log(:info, "Listener #{@signature} gracefully stopped.")
+                            @status = STOPPED_SYM
+                        end
+                    else
+                        EventMachine.next_tick do
+                            unless wait_for_connections_and_stop
+                                # Still some connections running, schedule a check later
+                                EM.add_periodic_timer(1) { wait_for_connections_and_stop }
+                            end
                         end
                     end
                 end
@@ -46,7 +59,8 @@ module EventMachine
                 def setup_opts(opts)
                     @logger = opts[:logger]
                     
-                    @handler = opts[:handler] || EmServer::Connection
+                    @handler = opts[:handler] || EventMachine::GServer::Listeners::Connection
+                    check_handler
                     
                     @separator = opts[:separator] || CRLF
                     @separator = nil if opts[:no_msg_separator] == true
@@ -60,7 +74,7 @@ module EventMachine
                     @max_connections = opts[MAX_CONNECTIONS_SYM].to_i
                     @max_connections = DEFAILT_MAX_CONNECTIONS if @max_connections <=0
                     
-                    check_handler
+                    @default_error_resp = opts[DEFAULT_ERROR_RESP_SYM] || DEFAULT_ERROR_RESP
                 end
         
                 def start_server
@@ -82,6 +96,7 @@ module EventMachine
                         connection.separator = @separator
                         connection.comm_inactivity_timeout = @inactivity_timeout
                         connection.pending_connect_timeout = @connection_timeout
+                        connection.default_error_resp = @default_error_resp
                     end
                 end
 
@@ -91,7 +106,7 @@ module EventMachine
                         log(:info, "Server #{@signature} gracefully stopped.")
                         true
                     else
-                        log(:info, "Server #{@signature } waiting for #{@connections.size} connection(s) to finish ...")
+                        log(:info, "Listener #{@signature } waiting for #{@connections.size} connection(s) to finish ...")
                         false
                     end
                 end

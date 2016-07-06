@@ -1,6 +1,3 @@
-require 'eventmachine'
-require 'em/gserver/listeners/base_listener'
-
 module EventMachine
     module GServer
         module Listeners
@@ -14,7 +11,7 @@ module EventMachine
                     @signature = EM.start_server(@host, @port, @handler) do |connection|
                       setup_connection_opts(connection)
                     end
-                    log(:info, "Started #{@signature} linstening on tcp://#{@host}:#{@port} (separator=#{@separator.inspect}).")
+                    log(:info, "Started listener #{@signature} linstening on tcp://#{@host}:#{@port} (separator=#{@separator.inspect}).")
                     super
                 end
 
@@ -23,7 +20,7 @@ module EventMachine
                 def setup_opts(opts)
                     super(opts)
                     @port = opts[:port].to_i || EventMachine::GServer::DEFAULT_PORT
-                    @port = EmServer::DEFAULT_PORT if @port <= 0
+                    @port = EventMachine::GServer::DEFAULT_PORT if @port <= 0
                     @host = opts[:host] || EventMachine::GServer::DEFAULT_HOST
                 end
         

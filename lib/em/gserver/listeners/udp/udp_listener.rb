@@ -1,5 +1,3 @@
-require 'em/gserver/listeners/base_listener'
-
 module EventMachine
     module GServer
         module Listeners
