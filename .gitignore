@@ -1,5 +1,4 @@
 *.gem
-Gemfile.lock
 .ruby-version
 /.bundle/
 /.yardoc
@@ -11,3 +10,4 @@ Gemfile.lock
 /spec/reports/
 /tmp/
 /logs/
+/test_logs/
