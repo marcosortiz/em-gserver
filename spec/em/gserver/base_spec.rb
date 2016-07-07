@@ -10,11 +10,18 @@ describe EventMachine::GServer::Base do
         stop_servers
     end
     
-    def start_server(s)
-        t = Thread.new { s.start }
-        while s.status != EventMachine::GServer::RUNNING_SYM
+    def wait_for_status(server, status, timeout = 3)
+        t0 = Time.now
+        while server.status != status
+            msg = "Server status never changed to #{status} in #{timeout} seconds."
+            fail msg if Time.now-t0 > timeout
             sleep 0.01
         end
+    end
+    
+    def start_server(s)
+        t = Thread.new { s.start }
+        wait_for_status(s, EventMachine::GServer::RUNNING_SYM)
         t.join(0.01)
         @servers << { server: s, thread: t}
         t
@@ -29,6 +36,7 @@ describe EventMachine::GServer::Base do
     def stop_server(server, thread)
         server.stop(true)
         thread.join
+        wait_for_status(server, EventMachine::GServer::STOPPED_SYM)
     end
     
     let :template_opts do
@@ -121,7 +129,7 @@ describe EventMachine::GServer::Base do
             it 'must not accept new connections, force all current connections to be closed, raise the exception and stop' do
                 s = server(opts)
                 c = client(port: port)
-                t = Thread.new { s.start }
+                t = start_server(s)
                 
                 # 1. Server is running, with an active connection
                 expect(c.send_msg(msg)).to eq msg
@@ -182,7 +190,7 @@ describe EventMachine::GServer::Base do
             
             it 'must close the current connection, keep running and accepting new connections' do
                 s = server(opts)
-                start_server(s)
+                t = start_server(s)
                 
                 c = client(port: port)
                 3.times do
@@ -192,15 +200,16 @@ describe EventMachine::GServer::Base do
                     expect(s.status).to eq(EventMachine::GServer::RUNNING_SYM)
                 end
                 c.disconnect
+                stop_server(s, t)
             end
         end
     end
     describe 'starting' do
-        it 'must be idempotent' do
+        
+        it 'must be idempotent'  do
             s = server
-            t = Thread.new {
-                expect(s.start).to eq EventMachine::GServer::STARTING_SYM
-            }
+            expect(s.status).to eq EventMachine::GServer::STOPPED_SYM
+            t = start_server(s)
             3.times do |i|
                 expect(s.start).to eq EventMachine::GServer::RUNNING_SYM
             end
@@ -223,24 +232,24 @@ describe EventMachine::GServer::Base do
             end
         end
         context 'with no listeners specified' do
-            
+
             let :opts do
                 { listeners: [] }
             end
-            
+
             let :count do
                 10
             end
-            
+
             let(:my_server) do
                 Class.new(described_class) do
                     attr_reader :count
-                    
+
                     def initialize(opts={})
                         @count = 0
                         super(opts)
                     end
-                    
+
                     def do_work
                         loop do
                             @count += 1
@@ -249,15 +258,16 @@ describe EventMachine::GServer::Base do
                     end
                 end
             end
-            
+
             it 'must call do_work' do
                 s = server(opts)
                 expect(s.status).to eq EventMachine::GServer::STOPPED_SYM
                 expect(s.count).to eq 0
-                
-                start_server(s)
+
+                t = start_server(s)
                 expect(s.status).to eq EventMachine::GServer::RUNNING_SYM
                 expect(s.count).to eq count
+                stop_server(s, t)
             end
         end
         context 'with valid listeners specified' do
@@ -309,18 +319,14 @@ describe EventMachine::GServer::Base do
         
         it 'must be idempotent' do
             s = server
-            
+            expect(s.status).to eq EventMachine::GServer::STOPPED_SYM
             3.times do |i|
                 expect(s.stop(true)).to eq EventMachine::GServer::STOPPED_SYM
             end
             
-            t = Thread.new {
-                expect(s.start)
-            }
-            while s.status != EventMachine::GServer::RUNNING_SYM
-                sleep 0.1
-            end
+            t = start_server(s)
             
+            stop_server(s, t)
             3.times do |i|
                 expect(s.stop(true)).to eq EventMachine::GServer::STOPPED_SYM
             end
