@@ -2,14 +2,6 @@ require 'spec_helper'
 
 describe EventMachine::GServer::Base do
 
-    before :all do
-        @servers = []
-    end
-
-    after :all do
-        stop_servers
-    end
-    
     def wait_for_status(server, status, timeout = 3)
         t0 = Time.now
         while server.status != status
@@ -23,14 +15,7 @@ describe EventMachine::GServer::Base do
         t = Thread.new { s.start }
         wait_for_status(s, EventMachine::GServer::RUNNING_SYM)
         t.join(0.01)
-        @servers << { server: s, thread: t}
         t
-    end
-    
-    def stop_servers
-        @servers.each do |hash|
-            stop_server(hash[:server], hash[:thread])
-        end
     end
     
     def stop_server(server, thread)
@@ -312,11 +297,6 @@ describe EventMachine::GServer::Base do
         end
     end
     describe 'stopping' do
-        
-        let :port do
-            2006
-        end
-        
         it 'must be idempotent' do
             s = server
             expect(s.status).to eq EventMachine::GServer::STOPPED_SYM
@@ -329,114 +309,6 @@ describe EventMachine::GServer::Base do
             stop_server(s, t)
             3.times do |i|
                 expect(s.stop(true)).to eq EventMachine::GServer::STOPPED_SYM
-            end
-        end
-        it 'must not accept new connections and close all open ones' do
-            l = EventMachine::GServer::Listeners::TcpListener.new(template_opts.merge(port: port))
-            s = server( listeners: [l] )
-            
-            t = start_server(s)
-            c = client(port: port)
-            expect(c.send_msg('xxx')).to eq "OK"+EventMachine::GServer::CRLF
-            expect(c.connected?).to be true
-            expect(s.status).to eq EventMachine::GServer::RUNNING_SYM
-            
-            stop_server(s, t)
-        end
-    end
-    describe 'request processing' do
-        
-        let :count do
-            10
-        end
-        
-        let :separator do
-            EventMachine::GServer::CRLF
-        end
-        
-        let :msg_arr do
-            arr = []
-            count.times do |i|
-                arr << "#{i}"
-            end
-            arr << separator
-            arr
-        end
-
-        context 'using line separators' do
-            
-            let :port do
-                2007
-            end
-            
-            let(:my_connection) do
-                Class.new(EventMachine::GServer::Listeners::Connection) do
-                    
-                    def do_work(req)
-                        req
-                    end
-                    
-                end
-            end
-            
-            let :opts do
-                listener = EventMachine::GServer::Listeners::TcpListener.new(
-                    template_opts.merge(port: port, handler: my_connection)
-                )
-                { listeners: [ listener ] }
-            end
-            
-            context 'message arriving in several pieces' do
-                it 'must properly build the request before processing it' do
-                    s = server(opts)
-                    t = start_server(s)
-                    c = client(port: port, no_msg_separator: true)
-                    
-                    3.times do
-                        msg_arr.each do |msg|
-                            read_response = msg == separator ? true : false
-                            resp = c.send_msg(msg, read_response)
-                            if read_response
-                                expect(resp).to eq msg_arr.join
-                            else
-                                expect(resp).to be nil
-                            end
-                        end
-                    end
-
-                    stop_server(s, t)
-                end
-            end
-            context 'client and server with different line separators' do
-            
-                let :port do
-                    2008
-                end
-                
-                let :separator do
-                    '?'
-                end
-                
-                it 'should keep waiting for the proper separator before processing it' do
-                    s = server(opts)
-                    t = start_server(s)
-                    c = client(port: port, no_msg_separator: true)
-
-                    3.times do
-                        msg_arr.each do |msg|
-                            read_response = msg == separator ? true : false
-                            if read_response
-                                expect {
-                                    c.send_msg(msg, read_response)
-                                }.to raise_error(Timeout::Error)
-                            else
-                                expect(c.send_msg(msg, read_response)).to be nil
-                            end
-                        end
-                    end
-
-                    stop_server(s, t)
-                end
             end
         end
     end

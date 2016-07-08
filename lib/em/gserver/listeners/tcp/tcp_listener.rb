@@ -11,7 +11,7 @@ module EventMachine
                     @signature = EM.start_server(@host, @port, @handler) do |connection|
                       setup_connection_opts(connection)
                     end
-                    log(:info, "Started listener #{@signature} linstening on tcp://#{@host}:#{@port} (separator=#{@separator.inspect}).")
+                    log(:info, "Started listener #{@signature} on tcp://#{@host}:#{@port} (separator=#{@separator.inspect}).")
                     super
                 end
 
