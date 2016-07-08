@@ -34,13 +34,15 @@ module EventMachine
         
                 def stop(force=false)
                     return if @status == STOPPED_SYM
+                    is_udp = self.class == EventMachine::GServer::Listeners::UdpListener
+                    force = true if is_udp
                     if force == true
                         EventMachine.next_tick do
                             @connections.each do |conn|
                                 log(:info, "Forced stop requested. Closing connection #{conn.signature}")
                                 conn.close_connection(false)
                             end
-                            EM.stop_server(@signature)
+                            EM.stop_server(@signature) unless is_udp
                             log(:info, "Listener #{@signature} gracefully stopped.")
                             @status = STOPPED_SYM
                         end
@@ -82,7 +84,7 @@ module EventMachine
                     @started_at = Time.now.utc
                 end
 
-                def setup_connection_opts(connection)
+                def setup_connection_opts(connection, set_timeouts=false)
                     if connections.count >= @max_connections
                         msg = "Can not open more than #{@max_connections} simulatenous connections."
                         msg << "Connection #{connection.signature} discarded."
@@ -94,8 +96,8 @@ module EventMachine
                         connection.logger = @logger
                         connection.server = self
                         connection.separator = @separator
-                        connection.comm_inactivity_timeout = @inactivity_timeout
-                        connection.pending_connect_timeout = @connection_timeout
+                        connection.comm_inactivity_timeout = @inactivity_timeout if set_timeouts
+                        connection.pending_connect_timeout = @connection_timeout if set_timeouts
                         connection.default_error_resp = @default_error_resp
                     end
                 end
