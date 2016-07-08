@@ -118,7 +118,7 @@ module EventMachine
                 def check_handler
                     return if @handler <= EventMachine::GServer::Listeners::Connection
                     msg = "#{@handler} is not a subclass of SK::Workers::Listeners::Connection."
-                    fail msg
+                    raise InvalidHandlerClass.new(msg)
                 end
             end
         end
