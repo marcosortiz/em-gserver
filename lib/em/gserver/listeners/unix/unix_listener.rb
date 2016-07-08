@@ -1,12 +1,24 @@
 module EventMachine
     module GServer
         module Listeners
+            
+            #
+            # @author Marcos Ortiz
+            # Implements a Unix Listener.
+            #
             class UnixListener < EventMachine::GServer::Listeners::Base
 
+                #
+                # @param [Hash] opts the options for creating this class.
+                # @option opts [String] :socket_path ('/tmp/test_socket') The unix file to be used.
+                #
                 def initialize(opts={})
                     super(opts)
                 end
-            
+                
+                #
+                # Stops the server.
+                #
                 def start_server
                     @signature = EM.start_unix_domain_server(@socket_path, @handler) do |connection|
                       setup_connection_opts(connection)

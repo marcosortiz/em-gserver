@@ -6,6 +6,12 @@ require 'em/gserver/listeners/manager'
 
 module EventMachine
     module GServer
+        
+        #
+        # @author Marcos Ortiz
+        # Implements an evented generic server that can have spin up multiple
+        # TCP, UDP and Unix listeners.
+        #
         class Base
             include EventMachine::GServer::Utils
             include EventMachine::GServer::Listeners::Manager
@@ -16,6 +22,13 @@ module EventMachine
             attr_reader :logger, :listeners, :stopping, :stop_timeout,
                 :heartbeat_interval, :status
             
+            #
+            # @param [Hash] opts the options for creating this class.
+            # @option opts [Logger] :logger (nil) An instance of Logger.
+            # @option opts [Float] :stop_timeout (5) Timeout in seconds for the server to wait for open connections to close before closing them and stopping the server.
+            # @option opts [Float] :heartbeat_timeout (2) How often to check for dead connections.
+            # @option opts [Array] :listeners An array of instances of subclasses of {EventMachine::GServer::Listeners::Base}. 
+            #
             def initialize(opts={})
                 set_opts(opts)
                 set_listeners(opts)
@@ -24,9 +37,20 @@ module EventMachine
                 @stop_wait_count = 0
             end
             
+            #
+            # This method will be called when the server starts. You can use it
+            # to run periodic work.
+            #
             def do_work
             end
             
+            #
+            # Starts the server.
+            #
+            # Note that this is an idempotent operation. That is, you can call
+            # it several times. If the server is not running, it will start it.
+            # Otherwise it will just return the current (:running) status.
+            #
             def start
                 return @status unless @status == STOPPED_SYM
                 @status = STARTING_SYM
@@ -42,6 +66,16 @@ module EventMachine
                 end
             end
 
+            #
+            # Stops the server. 
+            #
+            # Note that this is an idempotent operation. That is, you can call
+            # it several times. If the server is running, it will stop it.
+            # Otherwise it will just return the current (:stopped) status.
+            #
+            # @param force [Boolean] Defaults to false. If true, will close any
+            # open connection before stopping. Otherwise, it will wait up until
+            # stop_timeout for all open connection to be closed before stopping.
             def stop(force=false)
                 return @status unless @status == RUNNING_SYM
                 @status = STOPPING_SYM
