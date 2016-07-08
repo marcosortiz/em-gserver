@@ -1,5 +1,8 @@
-require File.join(File.dirname(__FILE__), '..', 'gserver')
-require File.join(File.dirname(__FILE__), 'listeners', 'manager')
+require 'em/gserver/constants'
+require 'em/gserver/exceptions'
+require 'em/gserver/utils'
+require 'em/gserver/version'
+require 'em/gserver/listeners/manager'
 
 module EventMachine
     module GServer
@@ -7,13 +10,16 @@ module EventMachine
             include EventMachine::GServer::Utils
             include EventMachine::GServer::Listeners::Manager
             
-            DEFAULT_STOP_TIMEOUT = 5.0 # seconds
+            DEFAULT_STOP_TIMEOUT               = 5.0 # seconds
+            DEFAULT_HEARTBEAT_TIMEOUT          = 2.0 # seconds
             
-            attr_reader :logger, :listeners, :stopping, :stop_wait_count
+            attr_reader :logger, :listeners, :stopping, :stop_timeout,
+                :heartbeat_interval, :status
             
             def initialize(opts={})
                 set_opts(opts)
                 set_listeners(opts)
+                @status = STOPPED_SYM
                 @stopping = false
                 @stop_wait_count = 0
             end
@@ -22,28 +28,39 @@ module EventMachine
             end
             
             def start
-                return if EventMachine.reactor_running?
+                return @status unless @status == STOPPED_SYM
+                @status = STARTING_SYM
                 register_error_handler
                 EM.run do
                     register_trap_signals
+                    set_heartbeat_timeout(@heartbeat_timeout)
                     start_listeners
                     stop_reactor_if_all_listeners_stopped
                     do_work
-                    logger.info "EventMachine::GServer up and running with pid=#{Process.pid}. Press Ctrl+C to quit."
+                    log(:info, "EventMachine::GServer up and running with pid=#{Process.pid}.")
+                    @status = RUNNING_SYM
                 end
             end
 
-            def stop
+            def stop(force=false)
+                return @status unless @status == RUNNING_SYM
+                @status = STOPPING_SYM
                 @stopping = true
-                stop_listeners
+                stop_listeners(force)
+                EventMachine.stop if force == true && EventMachine.reactor_running?
+                @status = STOPPED_SYM
             end
 
             private
             
             def set_opts(opts={})
                 @logger = opts[:logger]
+                
                 @stop_timeout = opts[STOP_TIMEOUT_SYM].to_f
                 @stop_timeout = DEFAULT_STOP_TIMEOUT if @stop_timeout <= 0.0
+                
+                @heartbeat_timeout = opts[HEARTBEAT_TIMEOUT_SYM].to_f
+                @heartbeat_timeout = DEFAULT_HEARTBEAT_TIMEOUT if @heartbeat_timeout <= 0.0
             end
             
             #
@@ -51,8 +68,9 @@ module EventMachine
             #
             def register_error_handler
                 EM.error_handler do |e|
-                    logger.error "#{e.class}: #{e.message}"
-                    logger.error e.backtrace.join("\n")
+                    log(:error, "#{e.class}: #{e.message}")
+                    log(:error, e.backtrace.join("\n"))
+                    stop(true)
                     raise e
                 end
             end
@@ -87,6 +105,12 @@ module EventMachine
                     resp = true
                 end
                 resp
+            end
+            
+            def set_heartbeat_timeout(timeout)
+                if EventMachine.reactor_running?
+                    EventMachine.heartbeat_interval = timeout
+                end
             end
             
         end

@@ -1,3 +1,5 @@
+*.gem
+.ruby-version
 /.bundle/
 /.yardoc
 /Gemfile.lock
@@ -7,3 +9,5 @@
 /pkg/
 /spec/reports/
 /tmp/
+/logs/
+/test_logs/

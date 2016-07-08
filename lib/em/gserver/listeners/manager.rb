@@ -1,7 +1,7 @@
-require File.join(File.dirname(__FILE__), '..', 'constants')
-require File.join(File.dirname(__FILE__), 'tcp', 'tcp_listener')
-require File.join(File.dirname(__FILE__), 'udp', 'udp_listener')
-require File.join(File.dirname(__FILE__), 'unix', 'unix_listener')
+require 'em/gserver/listeners/base_listener'
+require 'em/gserver/listeners/tcp/tcp_listener'
+require 'em/gserver/listeners/udp/udp_listener'
+require 'em/gserver/listeners/unix/unix_listener'
 
 
 module EventMachine
@@ -22,15 +22,16 @@ module EventMachine
                     if opts[LISTENERS_SYM] && opts[LISTENERS_SYM].is_a?(Array)
                         opts[LISTENERS_SYM].each do |listener|
                             check_listener_class(listener)
+                            listener.server = self
                             @listeners << listener
                         end
                     end
                 end
                 
-                def stop_listeners
+                def stop_listeners(force=false)
                     @listeners.each do |listener|
                         next if listener.nil?
-                        listener.stop
+                        listener.stop(force)
                     end
                 end
                 
@@ -45,7 +46,8 @@ module EventMachine
                     LISTENERS_CLASSES.each do |klass|
                         return if listener.class <= klass
                     end
-                    fail "#{listener.class} is not a valid listener class."
+                    msg = "#{listener.class} is not a valid listener class."
+                    raise EventMachine::GServer::InvalidListener.new msg
                 end                
             end
         end

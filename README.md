@@ -1,8 +1,8 @@
-# Em::Sockets
+# EventMachine::GServer [![Build Status](https://travis-ci.org/marcosortiz/em-gserver.svg?branch=dev)](https://travis-ci.org/marcosortiz/em-gserver) [![Dependency Status](https://gemnasium.com/badges/github.com/marcosortiz/em-gserver.svg)](https://gemnasium.com/github.com/marcosortiz/em-gserver)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/em/sockets`. To experiment with that code, run `bin/console` for an interactive prompt.
+The em-gserver gem provides an easy way to implement customisable servers that can run several instances of TCP, UDP and Unix listeners.
 
-TODO: Delete this and the text above, and describe your gem
+It uses [eventmachine](https://github.com/eventmachine/eventmachine) and was inspired by the [gserver](https://github.com/ruby/gserver) gem.
 
 ## Installation
 
@@ -24,7 +24,7 @@ Or install it yourself as:
 
 TODO: Write usage instructions here
 
-## Development
+## Development [![Code Climate](https://codeclimate.com/github/marcosortiz/em-gserver/badges/gpa.svg)](https://codeclimate.com/github/marcosortiz/em-gserver) [![Test Coverage](https://codeclimate.com/github/marcosortiz/em-gserver/badges/coverage.svg)](https://codeclimate.com/github/marcosortiz/em-gserver/coverage)
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
@@ -32,10 +32,9 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/em-gserver.
+Bug reports and pull requests are welcome on GitHub at https://github.com/marcosortiz/em-gserver.
 
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-

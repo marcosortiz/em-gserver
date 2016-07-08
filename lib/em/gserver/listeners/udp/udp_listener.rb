@@ -1,5 +1,3 @@
-require File.join(File.dirname(__FILE__), '..', 'base_listener')
-
 module EventMachine
     module GServer
         module Listeners

@@ -2,9 +2,6 @@ require 'logger'
 require 'time'
 require_relative '../lib/em/gserver'
 
-port = ARGV[0].to_i
-port = 2000 if port <= 0
-
 class MyConnection < EventMachine::GServer::Listeners::Connection
     def do_work(req)
         req
@@ -29,16 +26,14 @@ class MyServer < EventMachine::GServer::Base
 end
 
 opts = {
-    :port => port, 
+    :socket_path => './test_soket',
     :handler => MyConnection,
     :logger => Logger.new(STDOUT),
     :heartbeat_timeout => 1.0,
     :max_connections => 10,
 }
-listeners = []
-listeners << EventMachine::GServer::Listeners::TcpListener.new(opts)
+listeners = [ EventMachine::GServer::Listeners::UnixListener.new(opts) ]
 opts[:listeners] = listeners
-
 
 server = MyServer.new(opts)
 server.start
