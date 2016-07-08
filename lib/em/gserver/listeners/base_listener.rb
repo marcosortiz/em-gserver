@@ -3,6 +3,11 @@ require 'em/gserver/listeners/connection'
 module EventMachine
     module GServer
         module Listeners
+            
+            #
+            # @author Marcos Ortiz
+            # @abstract 
+            #
             class Base
                 include EventMachine::GServer::Utils
         
@@ -14,14 +19,28 @@ module EventMachine
                 DEFAULT_CONNECTION_TIMEOUT = 5.0 # seconds
                 DEFAILT_MAX_CONNECTIONS    = 5
                 DEFAULT_ERROR_RESP         = 'internal error'
-        
+                
+                #
+                # @param [Hash] opts the options for creating this class.
+                # @option opts [Class] :handler (EventMachine::GServer::Listeners::Connection) The class to be used to handle the connection.
+                # @option opts [String] :separator ("\r\n") Message separator.
+                # @option opts [Float] :inactivity_timeout (5.0) A nonzero value indicates that the connection or socket will automatically be closed if no read or write activity takes place for at least that number of seconds. A zero value specifies that no automatic timeout will take place.
+                # @option opts [Float] :connection_timeout (5.0) The duration in seconds after which a connection in the connecting state will fail.
+                # @option opts [Fixnum] :max_connections (5) The maximum number of concurrent connections that the listener can serve.
+                # @option opts [String] :default_error_resp ('internal error') The error message that will be returned if the listener crashes when processing a request.
+                #
                 def initialize(opts={})
                     setup_opts(opts)
                     @connections = []
                     @stop_requested = false
                     @status = STOPPED_SYM
                 end
-        
+                
+                #
+                # Starts a given listener. This method should not be called by
+                # the user. It will be called whenever {EventMachine::GServer::Base#start}
+                # is called.
+                #
                 def start
                     EventMachine.next_tick do
                         EM.add_periodic_timer(1) do
@@ -31,7 +50,12 @@ module EventMachine
 
                     start_server
                 end
-        
+                
+                #
+                # Stops a given listener. This method should not be called by
+                # the user. It will be called whenever {EventMachine::GServer::Base#stop}
+                # is called.
+                #
                 def stop(force=false)
                     return if @status == STOPPED_SYM
                     is_udp = self.class == EventMachine::GServer::Listeners::UdpListener

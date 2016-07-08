@@ -1,0 +1,5 @@
+--no-private
+--protected
+--markup="markdown" lib/**/*.rb
+--main README.md
+-M redcarpet
