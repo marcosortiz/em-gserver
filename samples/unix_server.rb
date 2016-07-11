@@ -36,4 +36,4 @@ listeners = [ EventMachine::GServer::Listeners::UnixListener.new(opts) ]
 opts[:listeners] = listeners
 
 server = MyServer.new(opts)
-server.start
+server.run

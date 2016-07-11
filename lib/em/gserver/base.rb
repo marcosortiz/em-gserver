@@ -48,10 +48,10 @@ module EventMachine
             # Starts the server.
             #
             # Note that this is an idempotent operation. That is, you can call
-            # it several times. If the server is not running, it will start it.
+            # it several times. If the server is not running, it will run it.
             # Otherwise it will just return the current (:running) status.
             #
-            def start
+            def run
                 return @status unless @status == STOPPED_SYM
                 @status = STARTING_SYM
                 register_error_handler

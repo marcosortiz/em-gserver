@@ -12,7 +12,7 @@ describe EventMachine::GServer::Base do
     end
     
     def start_server(s)
-        t = Thread.new { s.start }
+        t = Thread.new { s.run }
         wait_for_status(s, EventMachine::GServer::RUNNING_SYM)
         t.join(0.01)
         t
@@ -196,7 +196,7 @@ describe EventMachine::GServer::Base do
             expect(s.status).to eq EventMachine::GServer::STOPPED_SYM
             t = start_server(s)
             3.times do |i|
-                expect(s.start).to eq EventMachine::GServer::RUNNING_SYM
+                expect(s.run).to eq EventMachine::GServer::RUNNING_SYM
             end
             stop_server(s, t)
             expect(s.stop).to eq EventMachine::GServer::STOPPED_SYM

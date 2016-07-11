@@ -49,7 +49,7 @@ describe EventMachine::GServer::Listeners::UdpListener do
     end
     
     def start_server(s)
-        t = Thread.new { s.start }
+        t = Thread.new { s.run }
         wait_for_status(s, EventMachine::GServer::RUNNING_SYM)
         t.join(0.01)
         t

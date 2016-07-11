@@ -40,4 +40,4 @@ opts[:listeners] = listeners
 
 
 server = MyServer.new(opts)
-server.start
+server.run
