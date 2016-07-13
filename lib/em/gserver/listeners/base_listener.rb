@@ -129,7 +129,7 @@ module EventMachine
                 def wait_for_connections_and_stop
                     if @connections.empty?
                         EM.stop_server(@signature)
-                        log(:info, "Server #{@signature} gracefully stopped.")
+                        log(:info, "Listener #{@signature} gracefully stopped.")
                         true
                     else
                         log(:info, "Listener #{@signature } waiting for #{@connections.size} connection(s) to finish ...")
