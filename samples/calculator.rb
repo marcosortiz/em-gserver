@@ -91,4 +91,4 @@ opts[:port] += port
 listeners = [ EventMachine::GServer::Listeners::TcpListener.new(opts) ]
 opts[:listeners] = listeners
 server = EventMachine::GServer::Base.new(opts)
-server.start
+server.run

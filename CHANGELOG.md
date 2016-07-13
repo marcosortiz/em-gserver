@@ -1,3 +1,11 @@
+## 0.1.1 (2016-07-13)
+Features:
+    - Adding 'easy_daemons' gem so we can use EventMachine::GServer::Base#start to run the server as a daemon.
+
+## 0.1.0 (2016-07-11)
+Features:
+    - Renaming EventMachine::GServer::Base#start to run.
+    
 ## 0.1.0 (2016-07-08)
 Features:
     - Adding Udp listeners.

@@ -28,17 +28,14 @@ class MyServer < EventMachine::GServer::Base
     
 end
 
+logger = Logger.new('logs/tcp_server.log')
 opts = {
     :port => port, 
     :handler => MyConnection,
-    :logger => Logger.new(STDOUT),
+    :logger => logger,
     :heartbeat_timeout => 1.0,
     :max_connections => 10,
 }
-listeners = []
-listeners << EventMachine::GServer::Listeners::TcpListener.new(opts)
-opts[:listeners] = listeners
-
-
-server = MyServer.new(opts)
+listeners = [ EventMachine::GServer::Listeners::TcpListener.new(opts) ]
+server = MyServer.new('tcp_server', listeners: listeners, logger: logger)
 server.start

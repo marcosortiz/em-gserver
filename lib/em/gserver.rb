@@ -1,3 +1,4 @@
+require 'easy_daemons'
 require 'eventmachine'
 require 'em/gserver/base'
 

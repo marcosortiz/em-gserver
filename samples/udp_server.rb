@@ -28,16 +28,14 @@ class MyServer < EventMachine::GServer::Base
     
 end
 
+logger = Logger.new('logs/udp_server.log')
 opts = {
     :port => port, 
     :handler => MyConnection,
-    :logger => Logger.new(STDOUT),
+    :logger => logger,
     :heartbeat_timeout => 1.0,
     :max_connections => 10,
 }
 listeners = [ EventMachine::GServer::Listeners::UdpListener.new(opts) ]
-opts[:listeners] = listeners
-
-
-server = MyServer.new(opts)
+server = MyServer.new('udp_server', listeners: listeners, logger: logger)
 server.start
