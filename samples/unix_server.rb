@@ -25,15 +25,15 @@ class MyServer < EventMachine::GServer::Base
     
 end
 
+logger = Logger.new('logs/unix_server.log')
 opts = {
     :socket_path => './test_soket',
     :handler => MyConnection,
-    :logger => Logger.new(STDOUT),
+    :logger => logger,
     :heartbeat_timeout => 1.0,
     :max_connections => 10,
 }
 listeners = [ EventMachine::GServer::Listeners::UnixListener.new(opts) ]
-opts[:listeners] = listeners
 
-server = MyServer.new(opts)
-server.run
+server = MyServer.new('unix_server', logger: logger, listeners: listeners)
+server.start

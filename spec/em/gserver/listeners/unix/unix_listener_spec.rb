@@ -22,8 +22,8 @@ describe EventMachine::GServer::Listeners::UnixListener do
     end
 
     
-    def server(opts={})
-        EventMachine::GServer::Base.new(template_opts.merge(opts))
+    def server(name, opts={})
+        EventMachine::GServer::Base.new(name, template_opts.merge(opts))
     end
     
     def client(opts={})
@@ -61,9 +61,13 @@ describe EventMachine::GServer::Listeners::UnixListener do
         server.listeners.first
     end
     
+    let :name do
+        'my_test_server'
+    end
+    
     describe 'initialization' do
         it 'must initialize internal variables and options properly' do
-            s = server
+            s = server(name)
             l = listener(s)
             expect(l.instance_variable_get(:@handler)).to eq(EventMachine::GServer::Listeners::Connection)
             expect(l.instance_variable_get(:@separator)).to eq EventMachine::GServer::CRLF
@@ -90,7 +94,7 @@ describe EventMachine::GServer::Listeners::UnixListener do
             
             it 'must raise InvalidHandlerClass' do
                 expect {
-                    s = server(opts)
+                    s = server(name, opts)
                 }.to raise_error(EventMachine::GServer::InvalidHandlerClass, /#{invalid_class}/)
             end
         end
@@ -106,7 +110,7 @@ describe EventMachine::GServer::Listeners::UnixListener do
         end
         
         it 'must properly set the started_at and status fields and create socket file' do
-            s = server
+            s = server(name)
             l = listener(s)
             expect(l.status).to eq EventMachine::GServer::STOPPED_SYM
             
@@ -166,7 +170,7 @@ describe EventMachine::GServer::Listeners::UnixListener do
             
             context 'message arriving in several pieces' do
                 it 'must properly build the request before processing it' do
-                    s = server(opts)
+                    s = server(name, opts)
                     t = start_server(s)
                     c = client(socket_path: socket_path, no_msg_separator: true)
                     
@@ -196,7 +200,7 @@ describe EventMachine::GServer::Listeners::UnixListener do
                 end
                 
                 it 'should keep waiting for the proper separator before processing it' do
-                    s = server(opts)
+                    s = server(name, opts)
                     t = start_server(s)
                     c = client(socket_path: socket_path, no_msg_separator: true)
 
@@ -226,7 +230,7 @@ describe EventMachine::GServer::Listeners::UnixListener do
         
         it 'must not accept new connections, close all open ones and delete socket file' do
             l = described_class.new(template_opts.merge(socket_path: socket_path))
-            s = server( listeners: [l] )
+            s = server(name, listeners: [l] )
             
             t = start_server(s)
             expect(File.exists?(socket_path)).to be true

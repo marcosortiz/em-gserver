@@ -15,11 +15,12 @@ module EventMachine
         class Base
             include EventMachine::GServer::Utils
             include EventMachine::GServer::Listeners::Manager
+            include EasyDaemons::Helper
             
             DEFAULT_STOP_TIMEOUT               = 5.0 # seconds
             DEFAULT_HEARTBEAT_TIMEOUT          = 2.0 # seconds
             
-            attr_reader :logger, :listeners, :stopping, :stop_timeout,
+            attr_reader :name, :pid_file_path, :pid, :logger, :listeners, :stopping, :stop_timeout,
                 :heartbeat_interval, :status
             
             #
@@ -29,7 +30,8 @@ module EventMachine
             # @option opts [Float] :heartbeat_timeout (2) How often to check for dead connections.
             # @option opts [Array] :listeners An array of instances of subclasses of {EventMachine::GServer::Listeners::Base}. 
             #
-            def initialize(opts={})
+            def initialize(name, opts={})
+                @name = name
                 set_opts(opts)
                 set_listeners(opts)
                 @status = STOPPED_SYM
@@ -65,6 +67,24 @@ module EventMachine
                     @status = RUNNING_SYM
                 end
             end
+            
+            #
+            # This method simply runs the run method as a daemon background process.
+            #
+            def start
+                if is_already_running?(@name)
+                    log(:info, "Process #{@name} is already running.")
+                    exit(1)
+                end
+                log(:info, "Starting #{@name} worker in the background ...")
+                daemonize(@name)
+                @pid = curr_pid
+                log(:info, "#{@name} worker successfully started in the background (pid=#{@pid}).")
+                log(:info, "Refreshing #{@pid_file_path} file with #{@pid}.")
+                refresh_pid_file(@pid_file_path, @pid)
+                log(:info, "#{@pid_file_path} successfully created with #{@pid}.")
+                run
+            end
 
             #
             # Stops the server. 
@@ -95,6 +115,8 @@ module EventMachine
                 
                 @heartbeat_timeout = opts[HEARTBEAT_TIMEOUT_SYM].to_f
                 @heartbeat_timeout = DEFAULT_HEARTBEAT_TIMEOUT if @heartbeat_timeout <= 0.0
+                
+                @pid_file_path = opts[:pid_file_path] || "pids/#{@name}.pid"
             end
             
             #
@@ -115,6 +137,7 @@ module EventMachine
                     Signal.trap(signal) do
                         t = Thread.new do
                             stop
+                            remove_pid_file(@pid_file_path)
                         end
                         t.join
                     end

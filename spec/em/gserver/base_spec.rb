@@ -31,8 +31,8 @@ describe EventMachine::GServer::Base do
         }
     end
     
-    def server(opts={})
-        my_server.new(template_opts.merge(opts))
+    def server(name, opts={})
+        my_server.new(name, template_opts.merge(opts))
     end
     
     def client(opts={})
@@ -53,9 +53,13 @@ describe EventMachine::GServer::Base do
         end
     end
     
+    let :name do
+        'my_test_server'
+    end
+    
     describe 'initialization' do
         it 'must initialize internal variables and options properly' do
-            server = subject
+            server = described_class.new(name)
             expect(server.logger).to be nil
             expect(server.stop_timeout).to eq described_class::DEFAULT_STOP_TIMEOUT
             expect(server.listeners). to eq []
@@ -112,7 +116,7 @@ describe EventMachine::GServer::Base do
             end
             
             it 'must not accept new connections, force all current connections to be closed, raise the exception and stop' do
-                s = server(opts)
+                s = server(name, opts)
                 c = client(port: port)
                 t = start_server(s)
                 
@@ -174,7 +178,7 @@ describe EventMachine::GServer::Base do
             end
             
             it 'must close the current connection, keep running and accepting new connections' do
-                s = server(opts)
+                s = server(name, opts)
                 t = start_server(s)
                 
                 c = client(port: port)
@@ -192,7 +196,7 @@ describe EventMachine::GServer::Base do
     describe 'starting' do
         
         it 'must be idempotent'  do
-            s = server
+            s = server(name)
             expect(s.status).to eq EventMachine::GServer::STOPPED_SYM
             t = start_server(s)
             3.times do |i|
@@ -212,7 +216,7 @@ describe EventMachine::GServer::Base do
             
             it 'must raise EventMachine::GServer::InvalidListener' do
                 expect{
-                    s = server(opts)
+                    s = server(name, opts)
                 }.to raise_error(EventMachine::GServer::InvalidListener)
             end
         end
@@ -230,9 +234,9 @@ describe EventMachine::GServer::Base do
                 Class.new(described_class) do
                     attr_reader :count
 
-                    def initialize(opts={})
+                    def initialize(name, opts={})
                         @count = 0
-                        super(opts)
+                        super(name, opts)
                     end
 
                     def do_work
@@ -245,7 +249,7 @@ describe EventMachine::GServer::Base do
             end
 
             it 'must call do_work' do
-                s = server(opts)
+                s = server(name, opts)
                 expect(s.status).to eq EventMachine::GServer::STOPPED_SYM
                 expect(s.count).to eq 0
 
@@ -284,7 +288,7 @@ describe EventMachine::GServer::Base do
             end
             
             it 'must start all listeners' do
-                s = server(opts)
+                s = server(name, opts)
                 expect(s.listeners.count).to eq count
                 expect(s.status).to eq EventMachine::GServer::STOPPED_SYM
                 check_listeners(s, EventMachine::GServer::STOPPED_SYM)
@@ -298,7 +302,7 @@ describe EventMachine::GServer::Base do
     end
     describe 'stopping' do
         it 'must be idempotent' do
-            s = server
+            s = server(name)
             expect(s.status).to eq EventMachine::GServer::STOPPED_SYM
             3.times do |i|
                 expect(s.stop(true)).to eq EventMachine::GServer::STOPPED_SYM
