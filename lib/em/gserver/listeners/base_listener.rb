@@ -138,7 +138,7 @@ module EventMachine
                 end
 
                 def stop_server_if_requested
-                    stop if stop_requested
+                    server.stop if stop_requested
                 end
 
                 def check_handler
