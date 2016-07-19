@@ -21,12 +21,16 @@ module EventMachine
                     last_index = nil
 
                     #
-                    # parse requests based on @separator
+                    # parse requests
                     #
-                    while index = @buffer.index(@separator, offset)
-                        requests << req = @buffer[offset..index-1]
-                        offset = index + @separator.size
-                        last_index = index
+                    if @separator
+                        while index = @buffer.index(@separator, offset)
+                            requests << req = @buffer[offset..index-1]
+                            offset = index + @separator.size
+                            last_index = index
+                        end
+                    else
+                        requests << @buffer
                     end
 
                     #
@@ -39,9 +43,13 @@ module EventMachine
                     #
                     # Remove processed requests from buffer.
                     #
-                    unless last_index.nil?
-                        last_offset = last_index + @separator.size
-                        @buffer = @buffer[last_offset..-1]
+                    if @separator
+                        unless last_index.nil?
+                            last_offset = last_index + @separator.size
+                            @buffer = @buffer[last_offset..-1]
+                        end
+                    else
+                        @buffer = ''
                     end
                     log(:debug, "Left on @buff: #{@buffer.inspect}") unless @buffer.empty?
                 end
