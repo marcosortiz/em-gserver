@@ -9,6 +9,7 @@ end
 
 group :test do
   gem 'rspec'
-  gem 'codeclimate-test-reporter', require: nil
+  gem 'simplecov'
+  gem 'codeclimate-test-reporter',  "~> 1.0.0"
   gem 'easy_sockets', '~> 1.0.0'
 end
